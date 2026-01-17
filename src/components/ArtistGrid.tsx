@@ -2,7 +2,7 @@
 
 import { ArtistCard } from './ArtistCard'
 import { LoadingSpinner } from './LoadingSpinner'
-import type { ArtistSuggestion } from '@/types'
+import type { ArtistSuggestion, AppConfig } from '@/types'
 
 interface ArtistGridProps {
   suggestions: ArtistSuggestion[]
@@ -10,9 +10,10 @@ interface ArtistGridProps {
   addedMbids: Set<string>
   isLoading?: boolean
   loadingProgress?: { current: number; total: number }
+  config: AppConfig | null
 }
 
-export function ArtistGrid({ suggestions, onAdd, addedMbids, isLoading, loadingProgress }: ArtistGridProps) {
+export function ArtistGrid({ suggestions, onAdd, addedMbids, isLoading, loadingProgress, config }: ArtistGridProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -43,6 +44,7 @@ export function ArtistGrid({ suggestions, onAdd, addedMbids, isLoading, loadingP
           suggestion={suggestion}
           onAdd={onAdd}
           isAdded={suggestion.mbid ? addedMbids.has(suggestion.mbid) : false}
+          config={config}
         />
       ))}
     </div>

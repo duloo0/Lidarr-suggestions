@@ -29,7 +29,7 @@ export default function Home() {
         </button>
       </div>
       {error && <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-md">{error}</div>}
-      <ArtistGrid suggestions={suggestions} onAdd={addArtist} addedMbids={libraryMbids} isLoading={isLoading} loadingProgress={progress || undefined} />
+      <ArtistGrid suggestions={suggestions} onAdd={addArtist} addedMbids={libraryMbids} isLoading={isLoading} loadingProgress={progress || undefined} config={config} />
     </div>
   )
 }
