@@ -86,15 +86,15 @@ export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: Artis
         )}
       </div>
       <div className="p-4">
-        <h3 className="font-semibold text-lg truncate" title={suggestion.name}>
+        <h3 className="font-semibold text-lg truncate text-gray-900" title={suggestion.name}>
           {suggestion.name}
         </h3>
-        <p className="text-sm text-gray-500 mt-1">Similar to: {suggestion.sourceArtist}</p>
+        <p className="text-sm text-gray-700 mt-1">Similar to: {suggestion.sourceArtist}</p>
         <div className="flex items-center mt-2">
           <div className="flex-1 bg-gray-200 rounded-full h-2">
             <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${matchPercent}%` }} />
           </div>
-          <span className="ml-2 text-sm text-gray-600">{matchPercent}%</span>
+          <span className="ml-2 text-sm font-medium text-gray-800">{matchPercent}%</span>
         </div>
 
         {/* Confirmation dialog */}
