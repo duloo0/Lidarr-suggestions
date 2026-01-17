@@ -1,0 +1,44 @@
+# dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log*
+
+# next.js build output
+.next
+out
+build
+
+# testing
+coverage
+__tests__
+*.test.ts
+*.test.tsx
+jest.config.js
+jest.setup.ts
+
+# development
+.git
+.gitignore
+*.md
+!README.md
+
+# environment
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+*.pem
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
