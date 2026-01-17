@@ -13,7 +13,7 @@ export default function Home() {
   const { suggestions, libraryMbids, isLoading, progress, error, fetchSuggestions, addArtist } = useSuggestions(config)
 
   useEffect(() => { if (isReady && !isComplete) router.push('/settings') }, [isReady, isComplete, router])
-  useEffect(() => { if (isReady && isComplete && config) fetchSuggestions() }, [isReady, isComplete, config, fetchSuggestions])
+  useEffect(() => { if (isReady && isComplete && config) fetchSuggestions(false) }, [isReady, isComplete, config, fetchSuggestions])
 
   if (!isReady) return <div className="flex items-center justify-center min-h-[60vh]"><LoadingSpinner size="lg" /></div>
 
@@ -24,7 +24,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-gray-900">Artist Suggestions</h1>
           <p className="text-gray-600 mt-1">Based on {libraryMbids.size} artists in your library</p>
         </div>
-        <button onClick={fetchSuggestions} disabled={isLoading} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+        <button onClick={() => fetchSuggestions(true)} disabled={isLoading} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
           {isLoading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>

@@ -30,7 +30,16 @@ export class LidarrClient {
       },
     })
     if (!response.ok) {
-      throw new Error(`Lidarr API error: ${response.status} ${response.statusText}`)
+      let errorMessage = `Lidarr API error: ${response.status} ${response.statusText}`
+      try {
+        const errorBody = await response.json()
+        if (errorBody.message) errorMessage = errorBody.message
+        else if (typeof errorBody === 'string') errorMessage = errorBody
+        else errorMessage += ` - ${JSON.stringify(errorBody)}`
+      } catch {
+        // Could not parse error body
+      }
+      throw new Error(errorMessage)
     }
     return response.json()
   }
