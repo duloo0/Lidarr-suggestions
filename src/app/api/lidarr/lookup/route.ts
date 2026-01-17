@@ -6,25 +6,30 @@ export async function GET(request: NextRequest) {
   const url = searchParams.get('url')
   const apiKey = searchParams.get('apiKey')
   const mbid = searchParams.get('mbid')
+  const term = searchParams.get('term')
 
-  if (!url || !apiKey || !mbid) {
+  if (!url || !apiKey || (!mbid && !term)) {
     return NextResponse.json({ error: 'Missing parameters' }, { status: 400 })
   }
 
   try {
     const client = new LidarrClient({ baseUrl: url, apiKey })
-    const results = await client.lookupArtist(mbid)
+    const results = mbid
+      ? await client.lookupArtist(mbid)
+      : await client.searchArtist(term!)
 
     if (results.length === 0) {
-      return NextResponse.json({ error: 'Artist not found in MusicBrainz' }, { status: 404 })
+      return NextResponse.json({ error: 'Artist not found' }, { status: 404 })
     }
 
-    const artist = results[0]
     return NextResponse.json({
-      artistName: artist.artistName,
-      foreignArtistId: artist.foreignArtistId,
-      overview: artist.overview,
-      images: artist.images,
+      artists: results.map(a => ({
+        artistName: a.artistName,
+        foreignArtistId: a.foreignArtistId,
+        disambiguation: a.disambiguation,
+        overview: a.overview,
+      })),
+      multipleResults: results.length > 1,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

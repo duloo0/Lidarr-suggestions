@@ -64,6 +64,10 @@ export class LidarrClient {
     return this.fetch(`/api/v1/artist/lookup?term=lidarr:${mbid}`)
   }
 
+  async searchArtist(term: string): Promise<LidarrArtist[]> {
+    return this.fetch(`/api/v1/artist/lookup?term=${encodeURIComponent(term)}`)
+  }
+
   async addArtist(request: LidarrAddArtistRequest): Promise<LidarrArtist> {
     return this.fetch('/api/v1/artist', {
       method: 'POST',

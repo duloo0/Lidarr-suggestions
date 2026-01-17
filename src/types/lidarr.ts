@@ -2,6 +2,7 @@ export interface LidarrArtist {
   id: number
   artistName: string
   foreignArtistId: string  // MusicBrainz ID
+  disambiguation?: string  // e.g., "US rock band"
   overview?: string
   images?: LidarrImage[]
   monitored: boolean
