@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lidarr-suggestions:latest
+    container_name: lidarr-suggestions
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - HOSTNAME=0.0.0.0
+    networks:
+      - media-stack
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  media-stack:
+    name: ${DOCKER_NETWORK:-media-stack}
+    driver: bridge
+    # To use an existing network instead, comment out the above and uncomment below:
+    # external: true
