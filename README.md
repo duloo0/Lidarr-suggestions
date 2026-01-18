@@ -32,7 +32,7 @@ cp .env.example .env
 2. (Optional) Customize your `.env` file:
 ```env
 APP_PORT=3000              # Change the port if needed
-DOCKER_NETWORK=lidarr-suggestions-network  # Change network name if needed
+DOCKER_NETWORK=media-stack # Use existing network or change as needed
 ```
 
 3. Build and start the container:
@@ -66,8 +66,26 @@ docker-compose down -v
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `APP_PORT` | `3000` | Host port to expose the application |
-| `DOCKER_NETWORK` | `lidarr-suggestions-network` | Docker network name |
+| `DOCKER_NETWORK` | `media-stack` | Docker network name (can use existing networks like `bridge` or `media-stack`) |
 | `NODE_ENV` | `production` | Node environment mode |
+
+### Using Existing Docker Networks
+
+To connect with other services (Lidarr, Sonarr, etc.) on the same network:
+
+1. **Use an existing network:** Set `DOCKER_NETWORK` in `.env` to your existing network name (e.g., `media-stack`, `bridge`)
+
+2. **For truly external networks:** Edit `docker-compose.yml` and change the network configuration:
+   ```yaml
+   networks:
+     media-stack:
+       external: true
+   ```
+
+3. **Common network options:**
+   - `media-stack` - Connect with other media services
+   - `bridge` - Use Docker's default bridge network (Unraid default)
+   - Any custom network name you've created
 
 ### Manual Docker Build
 
