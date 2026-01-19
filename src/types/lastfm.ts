@@ -25,4 +25,9 @@ export interface ArtistSuggestion {
   imageUrl: string | null
   sourceArtist: string
   canAdd: boolean
+  // Extended MusicBrainz data
+  type?: string          // "Group", "Person", "Orchestra", etc.
+  country?: string       // "US", "GB", etc.
+  disambiguation?: string
+  genres?: string[]
 }
