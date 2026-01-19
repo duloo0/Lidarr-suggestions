@@ -62,6 +62,8 @@ export function useSuggestions(config: AppConfig | null) {
       const artists: Array<{ id: number; name: string; mbid: string }> = await res.json()
 
       const mbidSet = new Set(artists.map(a => a.mbid))
+      // Also track artist names (normalized) to catch duplicates with different MBIDs
+      const nameSet = new Set(artists.map(a => a.name.toLowerCase().trim()))
       setLibraryMbids(mbidSet)
 
       const allSuggestions: ArtistSuggestion[] = []
@@ -73,7 +75,12 @@ export function useSuggestions(config: AppConfig | null) {
           const simRes = await fetch(`/api/lastfm/similar?apiKey=${encodeURIComponent(config.lastfm.apiKey)}&artist=${encodeURIComponent(artists[i].name)}&limit=10`)
           if (simRes.ok) {
             const similar: ArtistSuggestion[] = await simRes.json()
-            allSuggestions.push(...similar.filter(s => !s.mbid || !mbidSet.has(s.mbid)))
+            // Filter out artists already in library by MBID or by name
+            allSuggestions.push(...similar.filter(s => {
+              if (s.mbid && mbidSet.has(s.mbid)) return false
+              if (nameSet.has(s.name.toLowerCase().trim())) return false
+              return true
+            }))
           }
         } catch { /* continue */ }
       }
