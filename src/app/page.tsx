@@ -10,7 +10,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner'
 export default function Home() {
   const router = useRouter()
   const { config, isReady, isComplete } = useConfig()
-  const { suggestions, libraryMbids, isLoading, progress, error, fetchSuggestions, addArtist } = useSuggestions(config)
+  const { suggestions, libraryMbids, isLoading, progress, error, fetchSuggestions, addArtist, dismissSuggestion, blacklistArtist } = useSuggestions(config)
 
   useEffect(() => { if (isReady && !isComplete) router.push('/settings') }, [isReady, isComplete, router])
   useEffect(() => { if (isReady && isComplete && config) fetchSuggestions(false) }, [isReady, isComplete, config, fetchSuggestions])
@@ -29,7 +29,7 @@ export default function Home() {
         </button>
       </div>
       {error && <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-md">{error}</div>}
-      <ArtistGrid suggestions={suggestions} onAdd={addArtist} addedMbids={libraryMbids} isLoading={isLoading} loadingProgress={progress || undefined} config={config} />
+      <ArtistGrid suggestions={suggestions} onAdd={addArtist} onDismiss={dismissSuggestion} onBlacklist={blacklistArtist} addedMbids={libraryMbids} libraryMbids={libraryMbids} isLoading={isLoading} loadingProgress={progress || undefined} config={config} />
     </div>
   )
 }

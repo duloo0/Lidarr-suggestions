@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Plus, Check, AlertCircle, X, Search } from 'lucide-react'
+import { Plus, Check, AlertCircle, X, Search, EyeOff, Ban } from 'lucide-react'
 import type { ArtistSuggestion, AppConfig } from '@/types'
 import { LoadingSpinner } from './LoadingSpinner'
 
@@ -10,6 +10,9 @@ interface MusicBrainzArtist {
   artistName: string
   foreignArtistId: string
   disambiguation?: string
+  type?: string
+  country?: string
+  genres?: string[]
   overview?: string
 }
 
@@ -21,11 +24,14 @@ interface LookupResponse {
 interface ArtistCardProps {
   suggestion: ArtistSuggestion
   onAdd: (suggestion: ArtistSuggestion) => Promise<void>
+  onDismiss: (id: string, name: string) => void
+  onBlacklist: (id: string, name: string) => void
   isAdded?: boolean
+  isInLibrary?: boolean
   config: AppConfig | null
 }
 
-export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: ArtistCardProps) {
+export function ArtistCard({ suggestion, onAdd, onDismiss, onBlacklist, isAdded = false, isInLibrary = false, config }: ArtistCardProps) {
   const [isAdding, setIsAdding] = useState(false)
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -68,11 +74,11 @@ export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: Artis
   }
 
   const handleSearch = async () => {
-    if (!searchTerm.trim() || !config) return
+    if (!searchTerm.trim()) return
     setIsLookingUp(true)
     setError(null)
     try {
-      const res = await fetch(`/api/lidarr/lookup?url=${encodeURIComponent(config.lidarr.url)}&apiKey=${encodeURIComponent(config.lidarr.apiKey)}&term=${encodeURIComponent(searchTerm)}`)
+      const res = await fetch(`/api/musicbrainz/search?term=${encodeURIComponent(searchTerm)}`)
       if (!res.ok) {
         const data = await res.json()
         throw new Error(data.error || 'Search failed')
@@ -140,12 +146,22 @@ export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: Artis
             🎵
           </div>
         )}
+        {isInLibrary && (
+          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+            In Library
+          </div>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-lg truncate text-gray-900" title={suggestion.name}>
           {suggestion.name}
         </h3>
         <p className="text-sm text-gray-700 mt-1">Similar to: {suggestion.sourceArtist}</p>
+        {(suggestion.type || suggestion.country) && (
+          <p className="text-xs text-gray-500 mt-1">
+            {[suggestion.type, suggestion.country].filter(Boolean).join(' · ')}
+          </p>
+        )}
         <div className="flex items-center mt-2">
           <div className="flex-1 bg-gray-200 rounded-full h-2">
             <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${matchPercent}%` }} />
@@ -194,7 +210,7 @@ export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: Artis
         {showSearch && lookupResults.length === 0 && !pendingArtist && (
           <div className="mt-3 p-3 bg-gray-50 rounded-md border">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-xs text-gray-500 uppercase font-medium">Search Lidarr</span>
+              <span className="text-xs text-gray-500 uppercase font-medium">Search MusicBrainz</span>
               <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
                 <X className="h-4 w-4" />
               </button>
@@ -258,6 +274,16 @@ export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: Artis
                 Cancel
               </button>
             </div>
+            <button
+              onClick={() => {
+                setPendingArtist(null)
+                setShowSearch(true)
+                setSearchTerm(suggestion.name)
+              }}
+              className="w-full mt-2 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              Not the right artist? Search instead
+            </button>
           </div>
         )}
 
@@ -285,9 +311,28 @@ export function ArtistCard({ suggestion, onAdd, isAdded = false, config }: Artis
             ) : suggestion.canAdd ? (
               <><Plus className="h-4 w-4" /> Add to Lidarr</>
             ) : (
-              <><Search className="h-4 w-4" /> Search in Lidarr</>
+              <><Search className="h-4 w-4" /> Search MusicBrainz</>
             )}
           </button>
+        )}
+
+        {!added && !pendingArtist && lookupResults.length === 0 && !showSearch && (
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => onDismiss(suggestion.mbid || suggestion.name, suggestion.name)}
+              className="flex-1 py-1 text-xs text-gray-500 hover:text-gray-700 flex items-center justify-center gap-1"
+              title="Hide this suggestion"
+            >
+              <EyeOff className="h-3 w-3" /> Hide
+            </button>
+            <button
+              onClick={() => onBlacklist(suggestion.mbid || suggestion.name, suggestion.name)}
+              className="flex-1 py-1 text-xs text-gray-500 hover:text-red-600 flex items-center justify-center gap-1"
+              title="Never show this artist"
+            >
+              <Ban className="h-3 w-3" /> Never
+            </button>
+          </div>
         )}
       </div>
     </div>

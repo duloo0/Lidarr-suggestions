@@ -7,13 +7,16 @@ import type { ArtistSuggestion, AppConfig } from '@/types'
 interface ArtistGridProps {
   suggestions: ArtistSuggestion[]
   onAdd: (suggestion: ArtistSuggestion) => Promise<void>
+  onDismiss: (id: string, name: string) => void
+  onBlacklist: (id: string, name: string) => void
   addedMbids: Set<string>
+  libraryMbids?: Set<string>
   isLoading?: boolean
   loadingProgress?: { current: number; total: number }
   config: AppConfig | null
 }
 
-export function ArtistGrid({ suggestions, onAdd, addedMbids, isLoading, loadingProgress, config }: ArtistGridProps) {
+export function ArtistGrid({ suggestions, onAdd, onDismiss, onBlacklist, addedMbids, libraryMbids, isLoading, loadingProgress, config }: ArtistGridProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -43,7 +46,10 @@ export function ArtistGrid({ suggestions, onAdd, addedMbids, isLoading, loadingP
           key={`${suggestion.mbid || suggestion.name}-${suggestion.sourceArtist}`}
           suggestion={suggestion}
           onAdd={onAdd}
+          onDismiss={onDismiss}
+          onBlacklist={onBlacklist}
           isAdded={suggestion.mbid ? addedMbids.has(suggestion.mbid) : false}
+          isInLibrary={suggestion.mbid ? libraryMbids?.has(suggestion.mbid) ?? false : false}
           config={config}
         />
       ))}

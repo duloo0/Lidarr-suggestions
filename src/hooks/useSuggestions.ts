@@ -171,5 +171,17 @@ export function useSuggestions(config: AppConfig | null) {
     })
   }, [config, suggestions])
 
-  return { suggestions, libraryMbids, isLoading, progress, error, fetchSuggestions, addArtist }
+  const dismissSuggestion = useCallback((id: string, name: string) => {
+    // Remove from current suggestions list
+    setSuggestions(prev => prev.filter(s => (s.mbid || s.name) !== id))
+    console.log(`Dismissed suggestion: ${name}`)
+  }, [])
+
+  const blacklistArtist = useCallback((id: string, name: string) => {
+    // Remove from current suggestions list
+    setSuggestions(prev => prev.filter(s => (s.mbid || s.name) !== id))
+    console.log(`Blacklisted artist: ${name}`)
+  }, [])
+
+  return { suggestions, libraryMbids, isLoading, progress, error, fetchSuggestions, addArtist, dismissSuggestion, blacklistArtist }
 }
