@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { getConfig, setConfig } from '@/lib/config'
 import type { AppConfig } from '@/types'
 import { LoadingSpinner } from './LoadingSpinner'
+import { useBlacklist } from '@/hooks/useBlacklist'
+import { Trash2 } from 'lucide-react'
 
 interface Profiles {
   rootFolders: Array<{ id: number; path: string }>
@@ -14,6 +16,7 @@ interface Profiles {
 
 export function SettingsForm() {
   const router = useRouter()
+  const { blacklisted, unblacklist } = useBlacklist()
   const [config, setLocalConfig] = useState<AppConfig>({ lidarr: { url: '', apiKey: '' }, lastfm: { apiKey: '' } })
   const [profiles, setProfiles] = useState<Profiles | null>(null)
   const [defaults, setDefaults] = useState({ rootFolderPath: '', qualityProfileId: 0, metadataProfileId: 0 })
@@ -135,6 +138,30 @@ export function SettingsForm() {
             </a>
           </p>
         </div>
+        {blacklisted.size > 0 && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">
+              Blacklisted Artists ({blacklisted.size})
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              These artists will never appear in suggestions.
+            </p>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {[...blacklisted.values()].map(artist => (
+                <div key={artist.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-gray-900">{artist.name}</span>
+                  <button
+                    onClick={() => unblacklist(artist.id)}
+                    className="text-red-500 hover:text-red-700 p-1"
+                    title="Remove from blacklist"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {error && <div className="p-4 bg-red-50 text-red-700 rounded-md">{error}</div>}
         {success && <div className="p-4 bg-green-50 text-green-700 rounded-md">{success}</div>}
         <button
