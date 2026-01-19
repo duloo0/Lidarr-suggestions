@@ -9,18 +9,11 @@ export async function POST(request: NextRequest) {
     }
 
     const client = new LidarrClient({ baseUrl: url, apiKey })
-    const lookupResults = await client.lookupArtist(artist.foreignArtistId)
 
-    if (lookupResults.length === 0) {
-      return NextResponse.json({ error: 'Artist not found in MusicBrainz' }, { status: 404 })
-    }
-
-    const lookup = lookupResults[0]
-
-    // Build add request with lookup data + user preferences
-    const artistToAdd = {
-      artistName: lookup.artistName,
-      foreignArtistId: lookup.foreignArtistId,
+    // If artistName is provided, we have full data from MusicBrainz search - skip lookup
+    const artistToAdd = artist.artistName ? {
+      artistName: artist.artistName,
+      foreignArtistId: artist.foreignArtistId,
       qualityProfileId: artist.qualityProfileId,
       metadataProfileId: artist.metadataProfileId,
       monitored: artist.monitored ?? true,
@@ -30,7 +23,27 @@ export async function POST(request: NextRequest) {
         monitor: 'all',
         searchForMissingAlbums: false,
       },
-    }
+    } : await (async () => {
+      // Legacy path: lookup by foreignArtistId only
+      const lookupResults = await client.lookupArtist(artist.foreignArtistId)
+      if (lookupResults.length === 0) {
+        throw new Error('Artist not found in MusicBrainz')
+      }
+      const lookup = lookupResults[0]
+      return {
+        artistName: lookup.artistName,
+        foreignArtistId: lookup.foreignArtistId,
+        qualityProfileId: artist.qualityProfileId,
+        metadataProfileId: artist.metadataProfileId,
+        monitored: artist.monitored ?? true,
+        albumFolder: artist.albumFolder ?? true,
+        rootFolderPath: artist.rootFolderPath,
+        addOptions: artist.addOptions ?? {
+          monitor: 'all',
+          searchForMissingAlbums: false,
+        },
+      }
+    })()
 
     const added = await client.addArtist(artistToAdd)
     return NextResponse.json(added)
